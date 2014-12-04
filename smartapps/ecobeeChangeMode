@@ -22,8 +22,9 @@ definition(
     author: "Yves Racine",
     description: "Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
     category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
+)
 
 
 preferences {
@@ -37,12 +38,12 @@ preferences {
 	section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
 		input "givenClimate", "string", title: "Climate?"
 	}
-    
+
     section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 	}
-    
+
 }
 
 def installed() {
@@ -58,29 +59,29 @@ def updated() {
 
 def changeMode(evt) {
     def message
-    
-   log.info message	
+
+   log.info message
     message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
     send(message)
     if (newMode == "Away") {
         if (givenClimate.trim().toUpperCase() == 'AWAY') {
         	thermostats?.away()
-                
-        } else thermostats?.setClimate("", givenClimate) 
+
+        } else thermostats?.setClimate("", givenClimate)
 
     }
     else {
         if (givenClimate.trim().toUpperCase() == 'HOME') {
             thermostats?.present()
-                
-        } else thermostats?.setClimate("", givenClimate) 
+
+        } else thermostats?.setClimate("", givenClimate)
     }
 }
 
 private send(msg) {
     if ( sendPushMessage != "No" ) {
         log.debug( "sending push message" )
-        sendPush( msg )	
+        sendPush( msg )
     }
     if ( phone ) {
         log.debug( "sending text message" )
