@@ -17,6 +17,7 @@
  * Don't forget to set the app to run only for the target mode.
  */
 definition(
+<<<<<<< HEAD
     name: "ecobeeChangeMode",
     namespace: "yracine",
     author: "Yves Racine",
@@ -25,26 +26,61 @@ definition(
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
+=======
+	name: "ecobeeChangeMode",
+	namespace: "yracine",
+	author: "Yves Racine",
+	description:
+	"Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
+	category: "",
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+>>>>>>> upstream/master
 
 
 preferences {
-	section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
-		input "newMode", "mode", metadata:[values:["Away", "Home", "Night"]]
-	}
+	page(name: "selectThermostats", title: "Thermostats", install: false, unintall: false, nextPage: "selectProgram") {
+		section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
+			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
+		}
 
-	section("Change the following thermostat(s)...") {
-		input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple: true
+		section("Change the following ecobee thermostat(s)...") {
+			input "thermostats", "capability.thermostat", title: "Which thermostat(s)", multiple: true
+		}
 	}
-	section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
-		input "givenClimate", "string", title: "Climate?"
+	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
+	page(name: "Notifications", title: "Notifications Options", install: true, unintall: true) {
+		section("Notifications") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+				false
+			input "phone", "phone", title: "Send a Text Message?", required: false
+		}
 	}
+<<<<<<< HEAD
 
     section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 	}
 
+=======
 }
+
+
+def selectProgram() {
+	def ecobeePrograms = thermostats[0].currentClimateList.tokenize(',')
+	log.debug "programs: $ecobeePrograms"
+
+
+	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
+		"Notifications") {
+		section("Select Program") {
+			input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
+		}
+	}
+>>>>>>> upstream/master
+}
+
 
 def installed() {
 	subscribe(location, changeMode)
@@ -57,7 +93,9 @@ def updated() {
 	subscribe(app, changeMode)
 }
 
+
 def changeMode(evt) {
+<<<<<<< HEAD
     def message
 
    log.info message
@@ -89,4 +127,36 @@ private send(msg) {
     }
 
     log.debug msg
+=======
+	def message
+
+	log.info message
+	message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
+	send(message)
+	if (newMode == "Away") {
+		if (givenClimate.trim().toUpperCase() == 'AWAY') {
+			thermostats?.away()
+
+		} else thermostats?.setClimate("", givenClimate)
+
+	} else {
+		if (givenClimate.trim().toUpperCase() == 'HOME') {
+			thermostats?.present()
+
+		} else thermostats?.setClimate("", givenClimate)
+	}
+}
+
+private send(msg) {
+	if (sendPushMessage != "No") {
+		log.debug("sending push message")
+		sendPush(msg)
+	}
+	if (phone) {
+		log.debug("sending text message")
+		sendSms(phone, msg)
+	}
+
+	log.debug msg
+>>>>>>> upstream/master
 }
